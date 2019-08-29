@@ -409,35 +409,6 @@ class PartialPuzzle():
                 self.HPList._addHPList(list(self.FG.HP[i].parentID))
             self.FailedToAddCandidate = 1
 
-    # #Functions used to identify the available, remaining, and finished features
-    #     def categorizeFeats(self,FeatList):
-    #         AllFeatList = []
-    #         AvailableFeatDict = {}
-    #         RemainingFeatDict = {}
-    #         CompleteFeatDict = {}
-    #         CurrFeatList = []
-    #         for FeatName in FeatList:
-    #             if FeatName in self.FG.FeatureList:
-    #                 AvailableFeatDict[FeatName] = self.getAvailableFeat(FeatName)
-    #                 RemainingFeatDict[FeatName] = self.getRemainingFeat(FeatName)
-    #                 CompleteFeatDict[FeatName] = self.getCompletedFeat(FeatName)
-    #         self.ARCFeat = [AvailableFeatDict,RemainingFeatDict,CompleteFeatDict]
-    #         return
-    #     def getAvailableFeat(self,FeatName):
-    #         Feat = getattr(self.FG,FeatName)
-    #         return bf.getAttributeOfFeatFromMemberID(Feat,'HPID',self.OuterHPs,'ID','any')
-    #     def getRemainingFeat(self,FeatName):
-    #         RemainingHPs = [x for x in self.FG.HP._IDlist if x not in self.InnerHPs]
-    #         Feat = getattr(self.FG,FeatName)
-    #         return bf.getAttributeOfFeatFromMemberID(Feat,'HPID',RemainingHPs,'ID','any')
-    #     def getCompletedFeat(self,FeatName):
-    #         Feat = getattr(self.FG,FeatName)
-    #         return bf.getAttributeOfFeatFromMemberID(Feat,'HPID',self.InnerHPs,'ID','all')
-    #
-    #     def getFeatInHPList(self,FeatName,HPList,anyorall):
-    #         Feat = getattr(self.FG,FeatName)
-    #         return bf.getAttributeOfFeatFromMemberID(Feat,'HPID',HPList,'ID',anyorall)
-
 def main():
     FG = FD.FeatureGroup()
     count = 1
