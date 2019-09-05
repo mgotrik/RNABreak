@@ -1,11 +1,13 @@
 import RNAfeatures as FD
 import basicfunc as bf
 import input
+import argparse
 
 class HairpinList():
 
-    def __init__(self, FG,HPList,maxlength=None):
+    def __init__(self, FG,HPList, minsubHPlength, subHPlength, maxlength=None):
 
+        assert(minsubHPlength is not None)
         global Sequence
         #Initialization will give it a list of hairpins and the FG that it belongs to.
         #This will then be "finished" by adding in missing HPs and tracking available routes, current sequence, length, etc.
@@ -21,6 +23,9 @@ class HairpinList():
         else:
             self.maxlength = maxlength
 
+        self.minsubHPlength = minsubHPlength
+        self.subHPlength = subHPlength
+        assert(self.minsubHPlength is not None)
         self.FG = FG
 
         Sequence = self.FG.Sequence
@@ -191,7 +196,7 @@ class HairpinList():
         return [x for x in self.HPList if x not in self.InnerHPs]
     def getStapleHPs(self):
         #Returns all HPs that are included in the minimal list but that are being replaced due to being too short (or too long and we don't want all their children)
-        return [x for x in self.OuterHPs if self.FG.HP[x].length <= input.minsubHPlength or self.FG.HP[x].length > 5]
+        return [x for x in self.OuterHPs if self.FG.HP[x].length <= self.minsubHPlength or self.FG.HP[x].length > 5]
     def getSubHPs(self):
         #Returns all HPs that are included in the minimal list but that are being replaced due to being too short
         return [x for x in self.OuterHPs if x not in self.StapleHPs]
@@ -241,8 +246,8 @@ class HairpinList():
             idxlist = self.FG.HP[HPID].idx
             idxlist5p = [x[0] for x in self.FG.HP[HPID].idx]
             idxlist3p = [x[1] for x in self.FG.HP[HPID].idx]
-            Sub5p = SubsHP[0:max(0,input.subHPlength-HPLen)] + "".join([Sequence.SeqList[seqno][x] for x in sorted(bf.FlattenList(idxlist5p))])
-            Sub3p = "".join([Sequence.SeqList[seqno][x] for x in sorted(bf.FlattenList(idxlist3p))]) + SubsHP[min(0,-input.subHPlength+HPLen):len(SubsHP)]
+            Sub5p = SubsHP[0:max(0,self.subHPlength-HPLen)] + "".join([Sequence.SeqList[seqno][x] for x in sorted(bf.FlattenList(idxlist5p))])
+            Sub3p = "".join([Sequence.SeqList[seqno][x] for x in sorted(bf.FlattenList(idxlist3p))]) + SubsHP[min(0,-self.subHPlength+HPLen):len(SubsHP)]
             #Sub3p = "".join([Sequence.SeqList[seqno][x] for x in sorted(bf.FlattenList(idxlist3p))]) + SubsHP[0:max(0,5-HPLen)]
             #Sub3p = "".join([Sequence.SeqList[seqno][x] for x in sorted(bf.FlattenList(idxlist3p))] + list(reversed(SubsHP))[0:max(0, 5 - HPLen)])
             #print("Sub5p", Sub5p)
@@ -250,7 +255,7 @@ class HairpinList():
             return Sub5p, Sub3p
         else:
             i = self.FG.HP[HPID].idx[0]
-            SubsHPtemp = Sequence[seqno][i[0]:i[0] + HPLen] + SubsHP[min(HPLen, input.subHPlength):-min(HPLen, input.subHPlength)] + Sequence[seqno][i[1] - HPLen + 1:i[1] + 1]
+            SubsHPtemp = Sequence[seqno][i[0]:i[0] + HPLen] + SubsHP[min(HPLen, self.subHPlength):-min(HPLen, self.subHPlength)] + Sequence[seqno][i[1] - HPLen + 1:i[1] + 1]
             return SubsHPtemp
     def _getSubstituteParentHP(self,seqno,HPID):
         SubsHP = input.SubsHP[seqno]
@@ -258,9 +263,9 @@ class HairpinList():
         idxlist = self.FG.HP[HPID].idx
         idxlist5p = [x[0] for x in self.FG.HP[HPID].idx]
         idxlist3p = [x[1] for x in self.FG.HP[HPID].idx]
-        Sub5p = SubsHP[0:max(0, input.subHPlength - HPLen)] + "".join([Sequence.SeqList[seqno][x] for x in sorted(bf.FlattenList(idxlist5p))])
-        Sub3p = "".join([Sequence.SeqList[seqno][x] for x in sorted(bf.FlattenList(idxlist3p))] + list(reversed(SubsHP))[0:max(0,input.subHPlength-HPLen)])
-        Sub3p = "".join([Sequence.SeqList[seqno][x] for x in sorted(bf.FlattenList(idxlist3p))]) + SubsHP[min(0,-input.subHPlength+HPLen):len(SubsHP)]
+        Sub5p = SubsHP[0:max(0, self.subHPlength - HPLen)] + "".join([Sequence.SeqList[seqno][x] for x in sorted(bf.FlattenList(idxlist5p))])
+        Sub3p = "".join([Sequence.SeqList[seqno][x] for x in sorted(bf.FlattenList(idxlist3p))] + list(reversed(SubsHP))[0:max(0,self.subHPlength-HPLen)])
+        Sub3p = "".join([Sequence.SeqList[seqno][x] for x in sorted(bf.FlattenList(idxlist3p))]) + SubsHP[min(0,-self.subHPlength+HPLen):len(SubsHP)]
 
         return Sub5p,Sub3p
     def _getSeq(self,seqno): #Logic for what to substitute for which kinds of bases (unchanged, hp->bulge (ShellHPs), bulge/other_hp ->hp (SubbedHPs)
@@ -316,9 +321,13 @@ class HairpinList():
 
 class PartialPuzzle():
 
-    def __init__(self,FG,maxlength,RequiredHPs):
+    def __init__(self,FG,maxlength,minsubHPlength, subHPlength, RequiredHPs):
         self.FG = FG
         self.maxlength = maxlength
+        assert(minsubHPlength is not None)
+        self.minsubHPlength = minsubHPlength
+        self.subHPlength = subHPlength
+        assert(self.minsubHPlength is not None)
         #self.RequiredHPs = self.FG.HP._IDlist
         self.RequiredHPs = list(RequiredHPs)
         self.OverWriteCandidateFlag = 0
@@ -387,7 +396,7 @@ class PartialPuzzle():
 
     def _initHPList(self,CandidateList):
         for HPID in CandidateList:
-            self.HPList = HairpinList(self.FG,[HPID],self.maxlength)
+            self.HPList = HairpinList(FG = self.FG, HPList=[HPID], minsubHPlength=self.minsubHPlength, subHPlength=self.subHPlength, maxlength=self.maxlength)
             if self.HPList.AddedLast=='yes':
                 self._updateIHPList()
                 return
@@ -409,18 +418,30 @@ class PartialPuzzle():
                 self.HPList._addHPList(list(self.FG.HP[i].parentID))
             self.FailedToAddCandidate = 1
 
+#maxlength = 300
+#minsubHPlength = 3 #HPs <=3 will be substituted
+#subHPlength = 6  #will be replaced with HPs of len <
+
+
 def main():
+    parser = argparse.ArgumentParser(description='Process some integers.')
+    parser.add_argument('--maxlength', type=int, help='max puzzle length', default=300)
+    parser.add_argument('--minsubHPlength', type=int, help='min length of a hairpin below which we substitute', default=3)
+    parser.add_argument('--subHPlength', type=int, help='length of sub hairpin', default=6)
+
+    args = parser.parse_args()
+
     FG = FD.FeatureGroup()
     count = 1
     print("Puzzle #", count)
-    IHP = PartialPuzzle(FG,input.maxlength,FG.HP._IDlist)
+    IHP = PartialPuzzle(FG, minsubHPlength=args.minsubHPlength, subHPlength=args.subHPlength, maxlength=args.maxlength,RequiredHPs=FG.HP._IDlist)
     RequiredHPs = [x for x in IHP.RequiredHPs if x not in IHP.HPList.HPList]
     RequiredHPs = [x for x in RequiredHPs if len(FG.HP[x].childrenID) < 5]
 
     while RequiredHPs!=[]:
         count+=1
         print("Puzzle #", count)
-        IHP = PartialPuzzle(FG, input.maxlength, RequiredHPs)
+        IHP = PartialPuzzle(FG, minsubHPlength=args.minsubHPlength, subHPlength=args.subHPlength, maxlength=args.maxlength, RequiredHPs=RequiredHPs)
         RequiredHPs = [x for x in IHP.RequiredHPs if x not in IHP.HPList.HPList]
         if RequiredHPs==IHP.RequiredHPs:
             break

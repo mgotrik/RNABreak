@@ -1,8 +1,4 @@
 
-maxlength = 300
-minsubHPlength = 3 #HPs <=3 will be substituted
-subHPlength = 6  #will be replaced with HPs of len <
-
 
 # Shooting Star
 Name = 'ShootingStar'
