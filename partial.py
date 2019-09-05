@@ -5,7 +5,7 @@ import argparse
 
 class HairpinList():
 
-    def __init__(self, FG,HPList, minsubHPlength, subHPlength, maxlength=None):
+    def __init__(self, FG,HPList, minsubHPlength, subHPlength, maxlength):
 
         assert(minsubHPlength is not None)
         global Sequence
@@ -15,14 +15,8 @@ class HairpinList():
             HPList[0]
         except:
             HPList = [HPList]
-        if maxlength == None:
-            try:
-                self.maxlength = input.maxlength
-            except:
-                self.maxlength = 250
-        else:
-            self.maxlength = maxlength
-
+        
+        self.maxlength = maxlength
         self.minsubHPlength = minsubHPlength
         self.subHPlength = subHPlength
         assert(self.minsubHPlength is not None)
@@ -301,14 +295,14 @@ class HairpinList():
         return "".join(AllSeq)
     def printSeq(self):
 
-        print(self._getSeq(1))
-        print(self._getSeq(2))
-        print(self._getSeq(3))
-        print(self._getSeq(4))
+        print(self._getSeq('sequence'))
+        print(self._getSeq('secstruct'))
+        print(self._getSeq('lock'))
+        print(self._getSeq('iupac'))
         return
 
     def __len__(self):
-        return len(self._getSeq(1))
+        return len(self._getSeq('sequence'))
     def __iter__(self):
         self.index = len(self.HPList)
         return self

@@ -7,7 +7,7 @@ class SequenceStruct():
     def __init__(self):
 
         #Defines the sequences
-        self.SeqList = {1: input.PS_Goal, 2: input.SS_Goal, 3: input.LS_Goal, 4: input.IUPAC_Goal}
+        self.SeqList = {'sequence': input.PS_Goal, 'secstruct': input.SS_Goal, 'lock': input.LS_Goal, 'iupac': input.IUPAC_Goal}
         #Goes through SS and identifies every bases partner (or -1 for bulge)
         self.PartnerIdxs = self.getPartnerIdxs()[0]
         #Creates a list of all base pairs [[0, 360], [10, 40],  ... ]
@@ -65,7 +65,7 @@ class SequenceStruct():
         # SS
         # Req'd Functions:
         # None
-        SS = self.SeqList[2]
+        SS = self.SeqList['secstruct']
         List_Of_Pairs = []  # List of all base pair partnerslist
         List_Of_Partner_Idx = [-1] * len(SS)  # List showing which base is paired with which
         SS_Base_Count = 0  # Which base we are looking at
