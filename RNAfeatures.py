@@ -4,10 +4,10 @@ global Sequence
 
 class SequenceStruct():
 
-    def __init__(self):
+    def __init__(self, PS_Goal, SS_Goal, LS_Goal, IUPAC_Goal):
 
         #Defines the sequences
-        self.SeqList = {'sequence': input.PS_Goal, 'secstruct': input.SS_Goal, 'lock': input.LS_Goal, 'iupac': input.IUPAC_Goal}
+        self.SeqList = {'sequence': PS_Goal, 'secstruct': SS_Goal, 'lock': LS_Goal, 'iupac': IUPAC_Goal}
         #Goes through SS and identifies every bases partner (or -1 for bulge)
         self.PartnerIdxs = self.getPartnerIdxs()[0]
         #Creates a list of all base pairs [[0, 360], [10, 40],  ... ]
@@ -52,7 +52,7 @@ class SequenceStruct():
             return []
     #len(Sequence) = length of the whole sequence
     def __len__(self):
-        return (len(input.SS_Goal))
+        return (len(self.SeqList['secstruct']))
     # printing sequence gives you the actual sequence
     def __str__(self, item=1):
         return self.SeqList[item]
@@ -378,17 +378,17 @@ class SequenceStruct():
 
         return ParentList
 
-Sequence = SequenceStruct()
+#Sequence = SequenceStruct()
 
 #This is the main class that is taken from this file. Allows you to reference all features in a structure as FG.HP[HPID], or FG.Bulge._IDlist, etc.
 class FeatureGroup():
-    def __init__(self):
+    def __init__(self, PS_Goal, SS_Goal, LS_Goal, IUPAC_Goal):
         #Sequence = SequenceStruct()
         global BaseMap, BPMap, HPMap, BulgeMap, HP, PathMap, Bulge, HPGroup
 
         self.FeatureList = {'Base','BP','HP','Bulge','Path','HPGroup'}
-        self.Sequence = SequenceStruct()
-        self.Base = BaseStruct(Sequence)
+        self.Sequence = SequenceStruct(PS_Goal, SS_Goal, LS_Goal, IUPAC_Goal)
+        self.Base = BaseStruct(self.Sequence)
         BaseMap = self.Base._pairmap
         self.NumBases = len(self.Base)
         # print("Number of Bases:", len(self.Base), self.Base.length)
@@ -397,7 +397,7 @@ class FeatureGroup():
         #self.Base._printme()
 
         # Gets the BasePair (BP) BPMap -> [1, 352] signifying 1-bp-352
-        self.BP = BasePairStruct(Sequence)
+        self.BP = BasePairStruct(self.Sequence)
 
 
         self.NumBPs = len(self.BP)
@@ -405,7 +405,7 @@ class FeatureGroup():
         # print([key for key in self.BP.__dict__])
 
         # Gets the Hairpin (HP) BPMap -> [[1, 14],[2,13]] signifying a 2bp Hairpin
-        self.HP = HairpinStruct(Sequence)
+        self.HP = HairpinStruct(self.Sequence)
         HPMap = self.HP._pairmap
         HP = self.HP
         self.NumHPs = len(self.HP)
@@ -414,7 +414,7 @@ class FeatureGroup():
         # print([key for key in self.HP.__dict__])
 
         # Gets the Bulge (HP) Map -> [[1, 14],[2,13]] signifying a 2bp Hairpin
-        self.Bulge = BulgeStruct(Sequence)
+        self.Bulge = BulgeStruct(self.Sequence)
         BulgeMap = self.Bulge._pairmap
         self.NumBulges = len(self.Bulge)
         Bulge = self.Bulge
@@ -425,7 +425,7 @@ class FeatureGroup():
 
 
         #   Searches all HPs for HPs that are of the same type ('kind'), none specifically (None), that are continuous ('near'), and under no ID list constraint (None)
-        self.HPGroup = HPGroupStruct(Sequence)
+        self.HPGroup = HPGroupStruct(self.Sequence)
         HPGroupMap = self.HPGroup._pairmap
         self.NumHPGroups = len(HPGroupMap)
         HPGroup = self.HPGroup
@@ -435,7 +435,7 @@ class FeatureGroup():
         #print([key for key in self.HPGroup.__dict__])
 
         # Gets the Path (Path) Map -> [[1, 14],[2,13]] signifying a 2bp Hairpin
-        self.Path = PathStruct(Sequence)
+        self.Path = PathStruct(self.Sequence)
         PathMap = self.Path._pairmap
         self.NumPaths = len(self.Path)
         # print("Number of Paths:", len(self.Path), self.Path.length)
@@ -645,7 +645,7 @@ class FeatureGroup():
 
 class Feature():
 
-    def __init__(self,PairMap,name):
+    def __init__(self,Sequence,PairMap,name):
 
         ### Feature definition: Any combination of bases forming a coherent linkage or network. i.e.
         #   Entry   Name        Base layout     how to reference
@@ -737,7 +737,7 @@ class Feature():
         if self.name=='Base':
             return []
         elif self.name=='BP':
-            ParentBP = Sequence.BPParentMap[Index]
+            ParentBP = self.parentseq.BPParentMap[Index]
             #print(self.name,"Parent of", Index,ParentBP)
             if ParentBP ==[] or ParentBP==[[]]:
                 return []
@@ -745,7 +745,7 @@ class Feature():
                 return ParentBP
 
         elif self.name=='HP':
-            ParentHP = (Sequence.HPParentMap[Index])
+            ParentHP = (self.parentseq.HPParentMap[Index])
             if ParentHP ==[] or ParentHP ==[[]]:
                 return []
             else:
@@ -753,7 +753,7 @@ class Feature():
 
         elif self.name=='Bulge':
 
-            ParentBulge = Sequence.BulgeParentMap[Index]
+            ParentBulge = self.parentseq.BulgeParentMap[Index]
             if ParentBulge ==[] or ParentBulge==[[]]:
                 return []
             else:
@@ -763,7 +763,7 @@ class Feature():
 
         elif self.name=='HPGroup' or self.name == 'Path':
             HPIDsInGroup = list(self._HPIDmap[Index])
-            HPParentMap = list(Sequence.HPParentMap)
+            HPParentMap = list(self.parentseq.HPParentMap)
             ParentHP = HPParentMap[HPIDsInGroup[0]]
             return [self._HPIDmap.index(x) for x in self._HPIDmap if any(elem in ParentHP for elem in x)]
     def _getneighborIDmap(self,ParentIDMap,ChildrenIDMap,SiblingIDMap):
@@ -818,7 +818,7 @@ class BaseStruct(Feature):
         name = 'Base'
         BaseMap = list(range(0, len(Sequence)))
         self.BaseMap = BaseMap
-        Feature.__init__(self,BaseMap,name)
+        Feature.__init__(self,Sequence,BaseMap,name)
     def __getitem__(self, item,seqno=None):
         Feature.__getitem__(self,item)
         if item<0 or item>len(self._pairmap)-1:
@@ -838,7 +838,7 @@ class BasePairStruct(Feature):
     def __init__(self,Sequence):
         #PartnerIdxs, self.BPMap = bf.getPartnerIdxs(Sequence[2])
         self.BPMap = Sequence.BPMap
-        Feature.__init__(self,self.BPMap,'BP')
+        Feature.__init__(self,Sequence,self.BPMap,'BP')
     def __getitem__(self, item,seqno=None):
         Feature.__getitem__(self,item)
         return self
@@ -848,7 +848,7 @@ class HairpinStruct(Feature):
     def __init__(self,Sequence):
         #HPMap = bf.getHPMap(Sequence[2])
         HPMap = Sequence.HPMap
-        Feature.__init__(self,HPMap,'HP')
+        Feature.__init__(self,Sequence,HPMap,'HP')
         self._leafmap = [self._isLeaf(x) for x in range(0,len(self._pairmap))]
         self._jxnmap =  [self._isJunction(x) for x in range(0,len(self._pairmap))]
         self._kindmap = [self._getHPkind(x) for x in range(0,len(self._pairmap))] #Defines how hairpins are later grouped into HPGroups
@@ -879,7 +879,7 @@ class BulgeStruct(Feature):
     def __init__(self,Sequence):
         self._parentHPIDmap = Sequence.BulgeParentHPMap
         self._childHPIDmap = Sequence.BulgeChildHPMap
-        Feature.__init__(self,list(Sequence.BulgeMap),"Bulge")
+        Feature.__init__(self,Sequence,list(Sequence.BulgeMap),"Bulge")
         #self._numopeningmap = [len(x) for x in self.BulgeInfo[0]]
         self._numopeningmap = [len(x) for x in self._pairmap]
         self._kindmap = [self._getBulgekind(x) for x in self._IDlist]
@@ -977,7 +977,7 @@ class HPGroupStruct(Feature):
         [self._HPIDmap, self._kindmap] = list(bf.groupAllFeaturesBasedOnAttribute(HP, 'kind',None, 'near', None))
         self._bulgeIDmap = [Bulge.getBulgesConnectingHPs(HP,x) for x in self._HPIDmap]
         HPGroupPairMap = [[HPMap[x] for x in y] for y in self._HPIDmap]
-        Feature.__init__(self,HPGroupPairMap,'HPGroup')
+        Feature.__init__(self,Sequence,HPGroupPairMap,'HPGroup')
     def __getitem__(self, item,seqno=None):
         Feature.__getitem__(self,item)
         if item<0 or item>len(self._pairmap)-1:
@@ -999,7 +999,7 @@ class PathStruct(Feature):
 
         self._bulgeIDmap = [Bulge.getBulgesConnectingHPs(HP, x) for x in self._HPIDmap]
         PathMap = [[HPMap[z] for z in x]+[BulgeMap[q] for q in y] for [x,y] in zip(self._HPIDmap,self._bulgeIDmap)]
-        Feature.__init__(self,PathMap,'Path')
+        Feature.__init__(self,Sequence,PathMap,'Path')
         self._kindmap = ["-".join([HPGroup[x].kind for x in y]) for y in self._HPGroupMap]
     def __getitem__(self,item,seqno=None):
         Feature.__getitem__(self,item)

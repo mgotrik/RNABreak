@@ -422,10 +422,24 @@ def main():
     parser.add_argument('--maxlength', type=int, help='max puzzle length', default=300)
     parser.add_argument('--minsubHPlength', type=int, help='min length of a hairpin below which we substitute', default=3)
     parser.add_argument('--subHPlength', type=int, help='length of sub hairpin', default=6)
+    parser.add_argument('--spec', type=str, help='file with puzzle specification', default='16S.puzzle_spec')
 
     args = parser.parse_args()
 
-    FG = FD.FeatureGroup()
+    PS_Goal, SS_Goal, LS_Goal, IUPAC_Goal = None, None, None, None
+    with open(args.spec) as f:
+        for line in f:
+            if line[0] == '#': continue
+            if line.split()[0] == 'PS_Goal:':
+                PS_Goal = line.split()[1].strip().replace("'", "")
+            if line.split()[0] == 'SS_Goal:':
+                SS_Goal = line.split()[1].strip().replace("'", "")
+            if line.split()[0] == 'LS_Goal:':
+                LS_Goal = line.split()[1].strip().replace("'", "")
+            if line.split()[0] == 'IUPAC_Goal:':
+                IUPAC_Goal = line.split()[1].strip().replace("'", "")
+
+    FG = FD.FeatureGroup(PS_Goal, SS_Goal, LS_Goal, IUPAC_Goal)
     count = 1
     print("Puzzle #", count)
     IHP = PartialPuzzle(FG, minsubHPlength=args.minsubHPlength, subHPlength=args.subHPlength, maxlength=args.maxlength,RequiredHPs=FG.HP._IDlist)
@@ -440,8 +454,8 @@ def main():
         if RequiredHPs==IHP.RequiredHPs:
             break
 
-    print(input.PS_Goal)
-    print(input.SS_Goal)
+    print(PS_Goal)
+    print(SS_Goal)
 
 
     # print(bf.getParentHP(FG,[1,2,33]))
