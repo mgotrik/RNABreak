@@ -5,10 +5,9 @@ import argparse
 
 class HairpinList():
 
-    def __init__(self, FG,HPList, minsubHPlength, subHPlength, maxlength):
+    def __init__(self, FG, HPList, minsubHPlength, subHPlength, maxlength):
 
         assert(minsubHPlength is not None)
-        global Sequence
         #Initialization will give it a list of hairpins and the FG that it belongs to.
         #This will then be "finished" by adding in missing HPs and tracking available routes, current sequence, length, etc.
         try:
@@ -22,7 +21,6 @@ class HairpinList():
         assert(self.minsubHPlength is not None)
         self.FG = FG
 
-        Sequence = self.FG.Sequence
         #print(FG.HP[8].progenyID)
         if HPList==[[]]:
             self.HPList = []
@@ -240,8 +238,8 @@ class HairpinList():
             idxlist = self.FG.HP[HPID].idx
             idxlist5p = [x[0] for x in self.FG.HP[HPID].idx]
             idxlist3p = [x[1] for x in self.FG.HP[HPID].idx]
-            Sub5p = SubsHP[0:max(0,self.subHPlength-HPLen)] + "".join([Sequence.SeqList[seqno][x] for x in sorted(bf.FlattenList(idxlist5p))])
-            Sub3p = "".join([Sequence.SeqList[seqno][x] for x in sorted(bf.FlattenList(idxlist3p))]) + SubsHP[min(0,-self.subHPlength+HPLen):len(SubsHP)]
+            Sub5p = SubsHP[0:max(0,self.subHPlength-HPLen)] + "".join([self.FG.Sequence.SeqList[seqno][x] for x in sorted(bf.FlattenList(idxlist5p))])
+            Sub3p = "".join([self.FG.Sequence.SeqList[seqno][x] for x in sorted(bf.FlattenList(idxlist3p))]) + SubsHP[min(0,-self.subHPlength+HPLen):len(SubsHP)]
             #Sub3p = "".join([Sequence.SeqList[seqno][x] for x in sorted(bf.FlattenList(idxlist3p))]) + SubsHP[0:max(0,5-HPLen)]
             #Sub3p = "".join([Sequence.SeqList[seqno][x] for x in sorted(bf.FlattenList(idxlist3p))] + list(reversed(SubsHP))[0:max(0, 5 - HPLen)])
             #print("Sub5p", Sub5p)
@@ -249,7 +247,7 @@ class HairpinList():
             return Sub5p, Sub3p
         else:
             i = self.FG.HP[HPID].idx[0]
-            SubsHPtemp = Sequence[seqno][i[0]:i[0] + HPLen] + SubsHP[min(HPLen, self.subHPlength):-min(HPLen, self.subHPlength)] + Sequence[seqno][i[1] - HPLen + 1:i[1] + 1]
+            SubsHPtemp = self.FG.Sequence[seqno][i[0]:i[0] + HPLen] + SubsHP[min(HPLen, self.subHPlength):-min(HPLen, self.subHPlength)] + self.FG.Sequence[seqno][i[1] - HPLen + 1:i[1] + 1]
             return SubsHPtemp
     def _getSubstituteParentHP(self,seqno,HPID):
         SubsHP = input.SubsHP[seqno]
@@ -257,9 +255,9 @@ class HairpinList():
         idxlist = self.FG.HP[HPID].idx
         idxlist5p = [x[0] for x in self.FG.HP[HPID].idx]
         idxlist3p = [x[1] for x in self.FG.HP[HPID].idx]
-        Sub5p = SubsHP[0:max(0, self.subHPlength - HPLen)] + "".join([Sequence.SeqList[seqno][x] for x in sorted(bf.FlattenList(idxlist5p))])
-        Sub3p = "".join([Sequence.SeqList[seqno][x] for x in sorted(bf.FlattenList(idxlist3p))] + list(reversed(SubsHP))[0:max(0,self.subHPlength-HPLen)])
-        Sub3p = "".join([Sequence.SeqList[seqno][x] for x in sorted(bf.FlattenList(idxlist3p))]) + SubsHP[min(0,-self.subHPlength+HPLen):len(SubsHP)]
+        Sub5p = SubsHP[0:max(0, self.subHPlength - HPLen)] + "".join([self.FG.Sequence.SeqList[seqno][x] for x in sorted(bf.FlattenList(idxlist5p))])
+        Sub3p = "".join([self.FG.Sequence.SeqList[seqno][x] for x in sorted(bf.FlattenList(idxlist3p))] + list(reversed(SubsHP))[0:max(0,self.subHPlength-HPLen)])
+        Sub3p = "".join([self.FG.Sequence.SeqList[seqno][x] for x in sorted(bf.FlattenList(idxlist3p))]) + SubsHP[min(0,-self.subHPlength+HPLen):len(SubsHP)]
 
         return Sub5p,Sub3p
     def _getSeq(self,seqno): #Logic for what to substitute for which kinds of bases (unchanged, hp->bulge (ShellHPs), bulge/other_hp ->hp (SubbedHPs)
@@ -269,12 +267,12 @@ class HairpinList():
         self.NativeIdx = list(sorted(bf.FlattenList(self._getHPIdx() + self._getBulgeIdx())))
         SubbedHPIdx = bf.FlattenList([self.FG.HP[x].idx[0] for x in BulgeHPs])
 
-        AllIdx = list(range(0,len(Sequence)))
+        AllIdx = list(range(0,len(self.FG.Sequence)))
         AllSeq = ['' for x in AllIdx]
 
         #Inserts the native bases
         for idx in self.NativeIdx:
-            AllSeq[idx] = Sequence[seqno][idx]
+            AllSeq[idx] = self.FG.Sequence[seqno][idx]
 
         #Inserts the bases for all HPs that are being subbed in
         for idx in SubbedHPIdx:
@@ -422,7 +420,7 @@ def main():
     parser.add_argument('--maxlength', type=int, help='max puzzle length', default=300)
     parser.add_argument('--minsubHPlength', type=int, help='min length of a hairpin below which we substitute', default=3)
     parser.add_argument('--subHPlength', type=int, help='length of sub hairpin', default=6)
-    parser.add_argument('--spec', type=str, help='file with puzzle specification', default='16S.puzzle_spec')
+    parser.add_argument('--spec', type=str, help='file with puzzle specification', default='16s.puzzle_spec')
 
     args = parser.parse_args()
 
