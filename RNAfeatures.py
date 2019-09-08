@@ -1,6 +1,5 @@
 import input
 import basicfunc as bf
-global Sequence
 
 class SequenceStruct():
 
