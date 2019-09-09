@@ -90,7 +90,6 @@ def getAttributeOfFeatFromMemberID(Feat,MemberIDSearchAttr,MemberIDList,ReturnAt
     return ReturnList
 
 def getPropertyOfFeatsWithProperty(Feat,attribute,attributeout, value=None,IDList=None):
-    ReturnList = []
     if IDList==None:
         IDList = Feat._IDlist
     if value==None:
