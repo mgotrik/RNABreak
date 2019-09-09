@@ -22,11 +22,12 @@ def depth(seq):
             return level
         seq = list(chain.from_iterable(s for s in seq if isinstance(s, Sequence)))
 
-#   Inputs a flat list, groups it into pairs
 def getPairsFromList(List):
     """
-    Inputs a flat list, groups it into pairs
+    Inputs a flat list, groups it into pairs. Original version did no checks;
+    this one asserts on list length
     """
+    assert(len(list) % 2 == 0)
     return zip(List[::2], List[1::2])
 
 #   Breaks all nested lists, in order, to give a single list
