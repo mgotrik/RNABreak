@@ -2,3 +2,4 @@ gold_output.txt
 new_output.txt
 __pycache__
 *.pyc
+.mypy_cache/
