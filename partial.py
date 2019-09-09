@@ -92,20 +92,24 @@ class HairpinList():
             self.AddedLast = 'yes'
 
 #Used to identify common features of HP groups
-    def getParentHP(self):
+    def update_parent_HP(self):
         try:
-            return self.findParentHP(self.HPList)
+            self.ParentHP = self.findParentHP()
         except:
-            return self.findParentHP(self.StartHPList)
-    def findParentHP(self, HPList):
-        if type(HPList) == int:
-            HPList = [int]
-        HPList = bf.CleanList(HPList)
-        for i in HPList:
+            self.ParentHP = self.findParentHP(start=True)
+    
+    def findParentHP(self, start=False):
+        temp_HPList = None
+        if start: temp_HPList = self.StartHPList
+        else: temp_HPList = self.HPList
+        if type(temp_HPList) == int:
+            temp_HPList = [int]
+        temp_HPList = bf.CleanList(temp_HPList)
+        for i in temp_HPList:
             progenyIDs = list(self.FG.HP[i].progenyID + [i])
-            if all(elem in progenyIDs for elem in HPList):
+            if all(elem in progenyIDs for elem in temp_HPList):
                 return i
-        ParentIDs = [self.FG.HP[x].parentID for x in HPList]
+        ParentIDs = [self.FG.HP[x].parentID for x in temp_HPList]
         ParentIDs = [x for x in ParentIDs if x != []]
         minParent = min(ParentIDs)[0]
         for i in list(reversed(range(0, minParent + 1))):
@@ -113,6 +117,7 @@ class HairpinList():
             if all(elem in progenyIDs for elem in HPList):
                 return [i]
         return []
+
     def _getAllConnectingHPs(self, HPList,IncludeParentFlag=0):
         FG = self.FG
         ParentHP = self.findParentHP(HPList)
@@ -178,7 +183,7 @@ class HairpinList():
             self.SubHPs = []
             self.ShellHPs = []
         else:
-            self.ParentHP = self.getParentHP()
+            self.update_parent_HP()
             self.InnerHPs = self.getInnerHPs()
             self.OuterHPs = self.getOuterHPs()
             self.StapleHPs = self.getStapleHPs()
@@ -355,14 +360,24 @@ class PartialPuzzle():
         else:
             print("HP does not fit within length requirements")
 
+    def update_parent_HP(self):
+        self.ParentHP = []
+        for HPID in self.IHPList:
+            if self.FG.HP[HPID].parentID==[] or not any(elem in self.FG.HP[HPID].parentID for elem in self.IHPList):
+                self.ParentHP.append(HPID)
+
     def _updateIHPList(self,hardoreasy='hard',Normalize=0):
         self.IHPList = self.getIHPList()
-        self.ParentHP = self.getParentHP()
+        
+        self.update_parent_HP()
+        #self.ParentHP = self.getParentHP()
+        
         self.LeafHP = self.getLeafHP()
         self.Candidate = self._sortFeatListByWeight('HP', list(self.LeafHP), hardoreasy, Normalize)
 
     def getIHPList(self):
         return [x for x in self.RequiredHPs if x not in self.HPList]
+   
     def getParentHP(self):
         ParentHP = []
         for HPID in self.IHPList:
@@ -373,7 +388,7 @@ class PartialPuzzle():
         return [x for x in self.IHPList if self.FG.HP[x].isleaf=='yes' or not any(elem in self.FG.HP[x].progenyID for elem in self.IHPList)]
     def _updateCandidates(self):
         self.IHPList = self.getIHPList()
-        self.ParentHP = self.getParentHP()
+        update_parent_HP(self)
         self.LeafHP = self.getLeafHP()
         try:
             self.LastAddedHP = self.HPList.lastAddedHP
