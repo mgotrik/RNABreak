@@ -42,16 +42,26 @@ class HairpinList():
 
 #Used to categorize all of the hairpins in self.HPList
     def _addHPList(self,HPListToAdd):
+        """
+        Takes either an int (converted to a list in place) or a list of ints
+        Filters that list to ensure it doesn't overlap with HPList
+        """
+
         if type(HPListToAdd)==int:
             HPListToAdd = [HPListToAdd]
         HPListToAdd = bf.CleanList([x for x in HPListToAdd if x not in self.HPList])
         if HPListToAdd==[]:
             return
+        
+        # PrevHPList is a list of all previous HPLists held by this HairpinList
         self.PrevHPList.append(list(self.HPList))
+        
+        # Clean the sum of InnerHPs and the new, non-intersecting-with-HPList stuff to be added
         self.HPList = bf.CleanList(self.InnerHPs+HPListToAdd)
 
         self.HPList = self._getAllConnectingHPs(self.HPList,0)
         self.categorizeHPs()
+
         if len(self)>self.maxlength: #Checks to see if the length is too long
             self._resetHPList()
             self.AddedLast = 'no'
@@ -60,7 +70,9 @@ class HairpinList():
         # if self.AddedLast=='yes':
         #     print(self._getSeq(1))
         #     print(self._getSeq(2))
-        return self
+        # AMW: don't return self; we never use it and that's confusing. This mutates the object.
+        #return self
+
     def _resetHPList(self):
         self.HPList = list(self.PrevHPList[-1])
         self.categorizeHPs()
