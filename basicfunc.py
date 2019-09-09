@@ -24,14 +24,10 @@ def depth(seq):
 
 #   Inputs a flat list, groups it into pairs
 def getPairsFromList(List):
-    NewList = [[List[0],List[1]]]
-    NumPairs = int(len(List) / 2)
-    if NumPairs > 1:
-        for i in range(1, NumPairs):
-            Idx1 = List[i * 2]
-            Idx2 = List[i * 2 + 1]
-            NewList.append([Idx1,Idx2])
-    return NewList
+    """
+    Inputs a flat list, groups it into pairs
+    """
+    return zip(List[::2], List[1::2])
 
 #   Breaks all nested lists, in order, to give a single list
 def FlattenList(List):
