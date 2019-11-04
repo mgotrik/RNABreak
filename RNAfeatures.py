@@ -145,8 +145,7 @@ class SequenceStruct():
         #Cleans up the previous list by appending the 5` and 3` bulges
 
         BPCount = 0
-        for i in range(0,len(AllBasePairs)-1):
-            CurrBP = AllBasePairs[i]
+        for i, CurrBP in enumerate(AllBasePairs):
             if CurrBP!=[]:
                 for j in range(i+1,len(AllBasePairs)):
                     if AllBasePairs[j]==CurrBP:
