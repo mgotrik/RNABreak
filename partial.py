@@ -255,8 +255,18 @@ class HairpinList():
             idxlist = self.FG.HP[HPID].idx
             idxlist5p = [x[0] for x in self.FG.HP[HPID].idx]
             idxlist3p = [x[1] for x in self.FG.HP[HPID].idx]
-            Sub5p = SubsHP[0:max(0,self.subHPlength-HPLen)] + "".join([self.FG.Sequence.SeqList[seqno][x] for x in sorted(bf.FlattenList(idxlist5p))])
-            Sub3p = "".join([self.FG.Sequence.SeqList[seqno][x] for x in sorted(bf.FlattenList(idxlist3p))]) + SubsHP[min(0,-self.subHPlength+HPLen):len(SubsHP)]
+            Sub5p = None
+            if seqno == "master_numbering":
+                Sub5p = [it for it in SubsHP[0:max(0,self.subHPlength-HPLen)]]
+                Sub5p.extend(bf.FlattenList([self.FG.Sequence.SeqList[seqno][x] for x in sorted(bf.FlattenList(idxlist5p))]))
+            else:
+                Sub5p = SubsHP[0:max(0,self.subHPlength-HPLen)] + "".join([self.FG.Sequence.SeqList[seqno][x] for x in sorted(bf.FlattenList(idxlist5p))])
+            Sub3p = None
+            if seqno == "master_numbering":
+                Sub3p = [it for it in [self.FG.Sequence.SeqList[seqno][x] for x in sorted(bf.FlattenList(idxlist3p))]]
+                Sub3p.extend(bf.FlattenList(SubsHP[min(0,-self.subHPlength+HPLen):len(SubsHP)]))
+            else:
+                Sub3p = "".join([self.FG.Sequence.SeqList[seqno][x] for x in sorted(bf.FlattenList(idxlist3p))]) + SubsHP[min(0,-self.subHPlength+HPLen):len(SubsHP)]
             #Sub3p = "".join([Sequence.SeqList[seqno][x] for x in sorted(bf.FlattenList(idxlist3p))]) + SubsHP[0:max(0,5-HPLen)]
             #Sub3p = "".join([Sequence.SeqList[seqno][x] for x in sorted(bf.FlattenList(idxlist3p))] + list(reversed(SubsHP))[0:max(0, 5 - HPLen)])
             #print("Sub5p", Sub5p)
@@ -264,7 +274,17 @@ class HairpinList():
             return Sub5p, Sub3p
         else:
             i = self.FG.HP[HPID].idx[0]
-            SubsHPtemp = self.FG.Sequence[seqno][i[0]:i[0] + HPLen] + SubsHP[min(HPLen, self.subHPlength):-min(HPLen, self.subHPlength)] + self.FG.Sequence[seqno][i[1] - HPLen + 1:i[1] + 1]
+            SubsHPtemp =  None
+            if seqno == "master_numbering":
+                #print(self.FG.Sequence[seqno][i[0]:i[0] + HPLen])
+                #print(SubsHP[min(HPLen, self.subHPlength):-min(HPLen, self.subHPlength)])
+                #print(self.FG.Sequence[seqno][i[1] - HPLen + 1:i[1] + 1])
+                SubsHPtemp = [it for it in self.FG.Sequence[seqno][i[0]:i[0] + HPLen]]
+                SubsHPtemp.extend(SubsHP[min(HPLen, self.subHPlength):-min(HPLen, self.subHPlength)])
+                SubsHPtemp.extend(self.FG.Sequence[seqno][i[1] - HPLen + 1:i[1] + 1])
+                #print(SubsHPtemp)
+            else:
+                SubsHPtemp = self.FG.Sequence[seqno][i[0]:i[0] + HPLen] + SubsHP[min(HPLen, self.subHPlength):-min(HPLen, self.subHPlength)] + self.FG.Sequence[seqno][i[1] - HPLen + 1:i[1] + 1]
             return SubsHPtemp
     def _getSubstituteParentHP(self,seqno,HPID):
         SubsHP = input.SubsHP[seqno]
@@ -272,9 +292,25 @@ class HairpinList():
         idxlist = self.FG.HP[HPID].idx
         idxlist5p = [x[0] for x in self.FG.HP[HPID].idx]
         idxlist3p = [x[1] for x in self.FG.HP[HPID].idx]
-        Sub5p = SubsHP[0:max(0, self.subHPlength - HPLen)] + "".join([self.FG.Sequence.SeqList[seqno][x] for x in sorted(bf.FlattenList(idxlist5p))])
-        Sub3p = "".join([self.FG.Sequence.SeqList[seqno][x] for x in sorted(bf.FlattenList(idxlist3p))] + list(reversed(SubsHP))[0:max(0,self.subHPlength-HPLen)])
-        Sub3p = "".join([self.FG.Sequence.SeqList[seqno][x] for x in sorted(bf.FlattenList(idxlist3p))]) + SubsHP[min(0,-self.subHPlength+HPLen):len(SubsHP)]
+        Sub5p = None
+        if seqno == "master_numbering":
+            #Sub5p = SubsHP[0:max(0, self.subHPlength - HPLen)].extend(bf.FlattenList([self.FG.Sequence.SeqList[seqno][x] for x in sorted(bf.FlattenList(idxlist5p))]))
+            Sub5p = [it for it in SubsHP[0:max(0, self.subHPlength - HPLen)]]
+            Sub5p.extend(bf.FlattenList([self.FG.Sequence.SeqList[seqno][x] for x in sorted(bf.FlattenList(idxlist5p))]))
+        else:
+            Sub5p = SubsHP[0:max(0, self.subHPlength - HPLen)] + "".join([self.FG.Sequence.SeqList[seqno][x] for x in sorted(bf.FlattenList(idxlist5p))])
+        Sub3p = None
+        if seqno == "master_numbering":
+            Sub3p = [it for it in [self.FG.Sequence.SeqList[seqno][x] for x in sorted(bf.FlattenList(idxlist3p))]]
+            Sub3p.extend(bf.FlattenList(list(reversed(SubsHP))[0:max(0,self.subHPlength-HPLen)]))
+        else:
+            Sub3p = "".join([self.FG.Sequence.SeqList[seqno][x] for x in sorted(bf.FlattenList(idxlist3p))+list(reversed(SubsHP))[0:max(0,self.subHPlength-HPLen)]])
+            
+        if seqno == "master_numbering":
+            Sub3p = [it for it in [self.FG.Sequence.SeqList[seqno][x] for x in sorted(bf.FlattenList(idxlist3p))]]
+            Sub3p.extend(bf.FlattenList((SubsHP[min(0,-self.subHPlength+HPLen):len(SubsHP)])))
+        else:
+            Sub3p = "".join([self.FG.Sequence.SeqList[seqno][x] for x in sorted(bf.FlattenList(idxlist3p))]) + SubsHP[min(0,-self.subHPlength+HPLen):len(SubsHP)]
 
         return Sub5p,Sub3p
     def _getSeq(self,seqno): #Logic for what to substitute for which kinds of bases (unchanged, hp->bulge (ShellHPs), bulge/other_hp ->hp (SubbedHPs)
@@ -302,18 +338,24 @@ class HairpinList():
             if HPID==ParentHP and any(elem in self.HPList for elem in self.FG.HP[ParentHP].progenyID):
                 LastIdx = HPIdx[1]
                 Sub5p,Sub3p = self._getSubstituteHP(seqno,HPID,'in')
-                AllSeq[FirstIdx] = Sub5p
+                AllSeq[FirstIdx] = Sub5p 
                 AllSeq[LastIdx] = Sub3p
             else:
                 AllSeq[FirstIdx] = self._getSubstituteHP(seqno,HPID,'out')
 
-        return "".join(AllSeq)
+        if seqno == "master_numbering":
+            return [it for it in bf.FlattenList(AllSeq) if it != '']
+        else:
+            return "".join(AllSeq)
+
     def printSeq(self):
 
         print(self._getSeq('sequence'))
         print(self._getSeq('secstruct'))
         print(self._getSeq('lock'))
         print(self._getSeq('iupac'))
+        print(self._getSeq('master_numbering'))
+
         return
 
     def __len__(self):
@@ -443,7 +485,7 @@ class PartialPuzzle():
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Process some integers.')
+    parser = argparse.ArgumentParser(description='Make subpuzzles')
     parser.add_argument('--maxlength', type=int, help='max puzzle length', default=300)
     parser.add_argument('--minsubHPlength', type=int, help='min length of a hairpin below which we substitute', default=3)
     parser.add_argument('--subHPlength', type=int, help='length of sub hairpin', default=6)
@@ -464,7 +506,7 @@ def main():
             if line.split()[0] == 'IUPAC_Goal:':
                 IUPAC_Goal = line.split()[1].strip().replace("'", "")
 
-    FG = FD.FeatureGroup(PS_Goal, SS_Goal, LS_Goal, IUPAC_Goal)
+    FG = FD.FeatureGroup(PS_Goal, SS_Goal, LS_Goal, IUPAC_Goal, [str(ii+1) for ii in range(len(PS_Goal))])
     count = 1
     print("Puzzle #", count)
     IHP = PartialPuzzle(FG, minsubHPlength=args.minsubHPlength, subHPlength=args.subHPlength, maxlength=args.maxlength,RequiredHPs=FG.HP._IDlist)

@@ -3,10 +3,10 @@ import basicfunc as bf
 
 class SequenceStruct():
 
-    def __init__(self, PS_Goal, SS_Goal, LS_Goal, IUPAC_Goal):
+    def __init__(self, PS_Goal, SS_Goal, LS_Goal, IUPAC_Goal, MN_Goal):
 
         #Defines the sequences
-        self.SeqList = {'sequence': PS_Goal, 'secstruct': SS_Goal, 'lock': LS_Goal, 'iupac': IUPAC_Goal}
+        self.SeqList = {'sequence': PS_Goal, 'secstruct': SS_Goal, 'lock': LS_Goal, 'iupac': IUPAC_Goal, 'master_numbering': MN_Goal}
         #Goes through SS and identifies every bases partner (or -1 for bulge)
         self.PartnerIdxs = self.getPartnerIdxs()[0]
         #Creates a list of all base pairs [[0, 360], [10, 40],  ... ]
@@ -380,12 +380,12 @@ class SequenceStruct():
 
 #This is the main class that is taken from this file. Allows you to reference all features in a structure as FG.HP[HPID], or FG.Bulge._IDlist, etc.
 class FeatureGroup():
-    def __init__(self, PS_Goal, SS_Goal, LS_Goal, IUPAC_Goal):
+    def __init__(self, PS_Goal, SS_Goal, LS_Goal, IUPAC_Goal, MN_Goal):
         #Sequence = SequenceStruct()
         global BaseMap, BPMap, HPMap, BulgeMap, HP, PathMap, Bulge, HPGroup
 
         self.FeatureList = {'Base','BP','HP','Bulge','Path','HPGroup'}
-        self.Sequence = SequenceStruct(PS_Goal, SS_Goal, LS_Goal, IUPAC_Goal)
+        self.Sequence = SequenceStruct(PS_Goal, SS_Goal, LS_Goal, IUPAC_Goal, MN_Goal)
         self.Base = BaseStruct(self.Sequence)
         BaseMap = self.Base._pairmap
         self.NumBases = len(self.Base)

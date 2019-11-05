@@ -41,7 +41,9 @@ Substitute_PS_Long = 'GCAUGCGAAAGCAUGC'
 Substitute_SS_Long = '((((((....))))))'
 Substitute_LS_Long = 'oooooooooooooooo'
 Substitute_IG_Long = 'NNNNNNNNNNNNNNNN'
-SubsHP = { 'sequence': Substitute_PS_Long, 'secstruct': Substitute_SS_Long, 'lock': Substitute_LS_Long, 'iupac': Substitute_IG_Long}
+#Substitute_MN_Long = ['-']*len(Substitute_IG_Long)
+Substitute_MN_Long = ['-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-']
+SubsHP = { 'sequence': Substitute_PS_Long, 'secstruct': Substitute_SS_Long, 'lock': Substitute_LS_Long, 'iupac': Substitute_IG_Long, 'master_numbering': Substitute_MN_Long }
 
 #This is how HPs -> bulges are replaced
-GenSub = {'sequence':'A','secstruct':'.','lock':'x','iupac':'A'}
+GenSub = {'sequence':'A','secstruct':'.','lock':'x','iupac':'A', 'master_numbering': '-'}
